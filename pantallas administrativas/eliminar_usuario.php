@@ -2,27 +2,34 @@
 session_start();
 require_once '../BLL/usuarioBLL.php';
 
+// Verifica que el usuario tenga permisos y que los datos sean válidos
 if (!isset($_SESSION['usuario_id']) || $_SESSION['rol'] !== 'admin') {
     header("Location: ../index.php");
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ids'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $usuarioBLL = new UsuarioBLL();
-    $ids = explode(',', $_POST['ids']); // Dividir la cadena de IDs
+    $ids = explode(',', $_POST['id']); // Divide los IDs recibidos si son varios
 
-    $success = true;
+    $success = true; // Variable para verificar si todo fue exitoso
+
     foreach ($ids as $id) {
+        // Intenta eliminar cada usuario, si falla marca error
         if (!$usuarioBLL->eliminarUsuario($id)) {
             $success = false;
             break;
         }
     }
 
-    echo $success ? "success" : "error";
+    // Envía la respuesta al cliente
+    if ($success) {
+        echo "success";
+    } else {
+        echo "error";
+    }
     exit();
 }
 
 echo "error";
 exit();
-?>

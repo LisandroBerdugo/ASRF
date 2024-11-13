@@ -1,6 +1,6 @@
 <?php
-ob_start(); // Inicia el buffering de salida
-session_start(); // Inicia la sesión
+ob_start();
+session_start();
 require_once 'BLL/usuarioBLL.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -10,13 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usuarioBLL = new UsuarioBLL();
     $usuario = $usuarioBLL->obtenerUsuarioPorEmail($email);
 
-    if ($usuario && $password === $usuario->password) {
-        // Almacena los datos en la sesión
-        $_SESSION['usuario_id'] = $usuario->id;
-        $_SESSION['rol'] = $usuario->rol;
-        $_SESSION['nombre'] = $usuario->nombre;
-
-        // Redirección definitiva para evitar problemas de caché
+    if ($usuario && $password === $usuario->getPassword()) {
+        $_SESSION['usuario_id'] = $usuario->getId();
+        $_SESSION['rol'] = $usuario->getRol();
+        $_SESSION['nombre'] = $usuario->getNombre();
         header("Location: http://localhost/ASRF/pantallas administrativas/dashboard.php", true, 303);
         exit();
     } else {
@@ -24,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Cierra el buffer de salida
 ob_end_flush();
 ?>
 

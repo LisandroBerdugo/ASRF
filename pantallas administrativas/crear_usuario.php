@@ -10,8 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usuarioBLL = new UsuarioBLL();
     $usuarioBLL->crearUsuario($nombre, $email, $password, $rol);
 
-    // Redirige de vuelta a la misma página para cerrar el popup y recargar la lista
-    header("Location: dashboard.php?page=usuarios");
+    // Simplemente terminar el script para que el popup se cierre
     exit();
 }
-?>
+

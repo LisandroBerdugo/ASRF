@@ -52,10 +52,15 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
                 .then(data => {
                     if (data === "success") {
                         alert("Usuario eliminado exitosamente");
-                        location.reload();
+                        const fila = document.querySelector(`tr[data-id="${id}"]`);
+                        if (fila) fila.remove();
                     } else {
                         alert("Error al eliminar el usuario");
                     }
+                })
+                .catch(error => {
+                    console.error("Error en la solicitud:", error);
+                    alert("Error en la solicitud.");
                 });
             }
         }
@@ -75,55 +80,53 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                     },
-                    body: 'id=' + ids
+                    body: 'id=' + encodeURIComponent(ids)
                 })
                 .then(response => response.text())
                 .then(data => {
                     if (data === "success") {
                         alert("Usuarios eliminados exitosamente");
-                        location.reload();
+                        checkboxes.forEach(cb => {
+                            const fila = cb.closest('tr');
+                            if (fila) fila.remove();
+                        });
                     } else {
                         alert("Error al eliminar los usuarios");
                     }
+                })
+                .catch(error => {
+                    console.error("Error en la solicitud:", error);
+                    alert("Ocurrió un error al intentar eliminar los usuarios.");
                 });
             }
         }
+
+        // Cierra el popup después de guardar un usuario
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('#form-crear-usuario');
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Evita recargar la página
+                const formData = new FormData(this);
+
+                // Enviar el formulario al servidor
+                fetch('crear_usuario.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(() => {
+                    cerrarPopup(); // Cierra el popup
+                    alert("Usuario agregado exitosamente");
+
+                    // Opcional: Limpia el formulario después de enviar
+                    form.reset();
+                })
+                .catch(error => {
+                    console.error("Error al procesar la solicitud:", error);
+                    alert("Error al guardar el usuario.");
+                });
+            });
+        });
     </script>
-    <style>
-        /* Estilos para el popup */
-        #popup {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        #popup .popup-content {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            width: 400px;
-            position: relative;
-            text-align: center;
-        }
-
-        #popup .popup-content h2 {
-            margin-top: 0;
-        }
-
-        #popup .popup-content .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-        }
-    </style>
 </head>
 <body>
     <div class="toolbar">
@@ -148,7 +151,7 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
             </thead>
             <tbody>
                 <?php foreach ($usuarios_pagina as $usuario): ?>
-                    <tr>
+                    <tr data-id="<?php echo $usuario->getId(); ?>">
                         <td><input type="checkbox" data-id="<?php echo $usuario->getId(); ?>" /></td>
                         <td><?php echo htmlspecialchars($usuario->getNombre()); ?></td>
                         <td><?php echo htmlspecialchars($usuario->getEmail()); ?></td>
@@ -172,7 +175,7 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
     <!-- Paginación -->
     <div class="pagination">
         <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-            <a href="?page=usuarios&pagina=<?php echo $i; ?>" class="page-btn <?php if ($i === $pagina_actual) echo 'active'; ?>">
+            <a href="?pagina=<?php echo $i; ?>" class="page-btn <?php if ($i === $pagina_actual) echo 'active'; ?>">
                 <?php echo $i; ?>
             </a>
         <?php endfor; ?>
@@ -183,18 +186,22 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
         <div class="popup-content">
             <span class="close-btn" onclick="cerrarPopup()">&times;</span>
             <h2>Agregar Usuario</h2>
-            <form action="crear_usuario.php" method="POST">
-                <label>Nombre:</label>
-                <input type="text" name="nombre" required>
-                <label>Email:</label>
-                <input type="email" name="email" required>
-                <label>Password:</label>
-                <input type="password" name="password" required>
-                <label>Rol:</label>
-                <select name="rol">
+            <form id="form-crear-usuario" method="POST" action="crear_usuario.php">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Ingresa el nombre" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="Ingresa el email" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="Ingresa el password" required>
+
+                <label for="rol">Rol:</label>
+                <select id="rol" name="rol" required>
                     <option value="admin">Admin</option>
                     <option value="vendedor">Vendedor</option>
                 </select>
+
                 <button type="submit" class="btn add-new">Guardar</button>
             </form>
         </div>
