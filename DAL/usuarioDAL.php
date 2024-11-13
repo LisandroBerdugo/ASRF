@@ -10,20 +10,27 @@ class UsuarioDAL {
         $this->conn = $conexion->getConexion();
     }
 
-    public function crearUsuario($usuario) {
-        try {
-            $query = "INSERT INTO usuarios (nombre, email, password, rol) VALUES (:nombre, :email, :password, :rol)";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindValue(':nombre', $usuario->getNombre());
-            $stmt->bindValue(':email', $usuario->getEmail());
-            $stmt->bindValue(':password', $usuario->getPassword());
-            $stmt->bindValue(':rol', $usuario->getRol());
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            echo "Error al crear usuario: " . $e->getMessage();
-            return false;
+public function crearUsuario($usuario) {
+    try {
+        $query = "INSERT INTO usuarios (nombre, email, password, rol) VALUES (:nombre, :email, :password, :rol)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':nombre', $usuario->getNombre());
+        $stmt->bindValue(':email', $usuario->getEmail());
+        $stmt->bindValue(':password', $usuario->getPassword());
+        $stmt->bindValue(':rol', $usuario->getRol());
+
+        $resultado = $stmt->execute();
+        if ($resultado) {
+            return true;
+        } else {
+            throw new PDOException("Error al ejecutar la consulta");
         }
+    } catch (PDOException $e) {
+        echo "Error al crear usuario: " . $e->getMessage(); // Depuración
+        return false;
     }
+}
+
 
     public function obtenerUsuarios() {
         try {
@@ -70,21 +77,31 @@ class UsuarioDAL {
         }
     }
 
-    public function actualizarUsuario($usuario) {
-        try {
-            $query = "UPDATE usuarios SET nombre = :nombre, email = :email, password = :password, rol = :rol WHERE id = :id";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindValue(':nombre', $usuario->getNombre());
-            $stmt->bindValue(':email', $usuario->getEmail());
-            $stmt->bindValue(':password', $usuario->getPassword());
-            $stmt->bindValue(':rol', $usuario->getRol());
-            $stmt->bindValue(':id', $usuario->getId());
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            echo "Error al actualizar usuario: " . $e->getMessage();
-            return false;
+public function actualizarUsuario($usuario) {
+    try {
+        $query = "UPDATE usuarios SET nombre = :nombre, email = :email, rol = :rol";
+        if (!empty($usuario->getPassword())) {
+            $query .= ", password = :password"; // Incluye la contraseña si está definida
         }
+        $query .= " WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':nombre', $usuario->getNombre());
+        $stmt->bindValue(':email', $usuario->getEmail());
+        $stmt->bindValue(':rol', $usuario->getRol());
+        $stmt->bindValue(':id', $usuario->getId());
+        if (!empty($usuario->getPassword())) {
+            $stmt->bindValue(':password', $usuario->getPassword());
+        }
+
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        echo "Error al actualizar usuario: " . $e->getMessage();
+        return false;
     }
+}
+
+
 
     public function eliminarUsuario($id) {
         try {

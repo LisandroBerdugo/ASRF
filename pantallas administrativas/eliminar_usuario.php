@@ -15,6 +15,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $success = true; // Variable para verificar si todo fue exitoso
 
     foreach ($ids as $id) {
+        // Valida que el ID sea numérico para evitar inyecciones
+        if (!is_numeric($id)) {
+            $success = false;
+            break;
+        }
+
         // Intenta eliminar cada usuario, si falla marca error
         if (!$usuarioBLL->eliminarUsuario($id)) {
             $success = false;
@@ -31,5 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     exit();
 }
 
+// Si algo falla, devuelve error
 echo "error";
 exit();

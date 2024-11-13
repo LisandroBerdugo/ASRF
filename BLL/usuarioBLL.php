@@ -27,6 +27,7 @@ class UsuarioBLL {
         return $this->usuarioDAL->actualizarUsuario($usuario);
     }
 
+
     public function eliminarUsuario($id) {
         return $this->usuarioDAL->eliminarUsuario($id);
     }

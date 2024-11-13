@@ -27,16 +27,35 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
 <head>
     <meta charset="UTF-8">
     <title>Gestión de Usuarios</title>
-    <link rel="stylesheet" href="dashboard.css"> 
-    <link rel="stylesheet" href="usuarios.css"> 
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="usuarios.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script>
         function mostrarPopup() {
             document.getElementById('popup').style.display = 'flex';
+            document.getElementById('overlay').style.display = 'block';
         }
 
         function cerrarPopup() {
             document.getElementById('popup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function mostrarPopupEditar(id, nombre, email, rol) {
+            const popupEditar = document.getElementById('popup-editar');
+            if (popupEditar) {
+                popupEditar.style.display = 'flex';
+                document.getElementById('editar-id').value = id;
+                document.getElementById('editar-nombre').value = nombre;
+                document.getElementById('editar-email').value = email;
+                document.getElementById('editar-rol').value = rol;
+                document.getElementById('overlay').style.display = 'block';
+            }
+        }
+
+        function cerrarPopupEditar() {
+            document.getElementById('popup-editar').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
         }
 
         function eliminarUsuario(id) {
@@ -66,69 +85,97 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
         }
 
         function eliminarUsuariosSeleccionados() {
-            const checkboxes = document.querySelectorAll('.user-table tbody input[type="checkbox"]:checked');
-            if (checkboxes.length === 0) {
-                alert("Selecciona al menos un usuario para eliminar.");
+            const checkboxes = document.querySelectorAll('.select-user:checked');
+            const ids = Array.from(checkboxes).map(checkbox => checkbox.getAttribute('data-id'));
+
+            if (ids.length === 0) {
+                alert('No has seleccionado ningún usuario.');
                 return;
             }
 
-            if (confirm("¿Estás seguro de que deseas eliminar los usuarios seleccionados?")) {
-                const ids = Array.from(checkboxes).map(cb => cb.getAttribute('data-id')).join(',');
-
+            if (confirm('¿Estás seguro de que deseas eliminar los usuarios seleccionados?')) {
                 fetch('eliminar_usuario.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                     },
-                    body: 'id=' + encodeURIComponent(ids)
+                    body: 'id=' + ids.join(',')
                 })
                 .then(response => response.text())
                 .then(data => {
-                    if (data === "success") {
-                        alert("Usuarios eliminados exitosamente");
-                        checkboxes.forEach(cb => {
-                            const fila = cb.closest('tr');
+                    if (data === 'success') {
+                        alert('Usuarios eliminados exitosamente');
+                        ids.forEach(id => {
+                            const fila = document.querySelector(`tr[data-id="${id}"]`);
                             if (fila) fila.remove();
                         });
                     } else {
-                        alert("Error al eliminar los usuarios");
+                        alert('Error al eliminar los usuarios seleccionados.');
                     }
                 })
                 .catch(error => {
-                    console.error("Error en la solicitud:", error);
-                    alert("Ocurrió un error al intentar eliminar los usuarios.");
+                    console.error('Error en la solicitud:', error);
+                    alert('Error en la solicitud.');
                 });
             }
         }
 
-        // Cierra el popup después de guardar un usuario
         document.addEventListener('DOMContentLoaded', function () {
-            const form = document.querySelector('#form-crear-usuario');
-            form.addEventListener('submit', function (event) {
-                event.preventDefault(); // Evita recargar la página
+            const formCrear = document.querySelector('#form-crear-usuario');
+            formCrear.addEventListener('submit', function (event) {
+                event.preventDefault();
                 const formData = new FormData(this);
 
-                // Enviar el formulario al servidor
                 fetch('crear_usuario.php', {
                     method: 'POST',
                     body: formData
                 })
-                .then(() => {
-                    cerrarPopup(); // Cierra el popup
-                    alert("Usuario agregado exitosamente");
-
-                    // Opcional: Limpia el formulario después de enviar
-                    form.reset();
+                .then(response => response.text())
+                .then(data => {
+                    if (data === 'success') {
+                        cerrarPopup();
+                        alert("Usuario agregado exitosamente");
+                        location.reload();
+                    } else {
+                        alert("Error al agregar el usuario.");
+                    }
                 })
                 .catch(error => {
                     console.error("Error al procesar la solicitud:", error);
                     alert("Error al guardar el usuario.");
                 });
             });
+
+            const formEditar = document.querySelector('#form-editar-usuario');
+            formEditar.addEventListener('submit', function (event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+
+                fetch('editar_usuario.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    if (data === 'success') {
+                        cerrarPopupEditar();
+                        alert("Usuario editado exitosamente");
+                        location.reload();
+                    } else {
+                        alert("Error al editar el usuario.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al procesar la solicitud:", error);
+                    alert("Error al editar el usuario.");
+                });
+            });
         });
     </script>
 </head>
 <body>
+    <div id="overlay"></div>
+
     <div class="toolbar">
         <button class="btn add-new" onclick="mostrarPopup()"><i class="fas fa-plus"></i> Agregar Nuevo</button>
         <div class="search-bar">
@@ -137,7 +184,6 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
         </div>
     </div>
 
-    <!-- Tabla de Usuarios -->
     <section class="table-section">
         <table class="user-table">
             <thead>
@@ -152,13 +198,14 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
             <tbody>
                 <?php foreach ($usuarios_pagina as $usuario): ?>
                     <tr data-id="<?php echo $usuario->getId(); ?>">
-                        <td><input type="checkbox" data-id="<?php echo $usuario->getId(); ?>" /></td>
-                        <td><?php echo htmlspecialchars($usuario->getNombre()); ?></td>
-                        <td><?php echo htmlspecialchars($usuario->getEmail()); ?></td>
-                        <td><?php echo htmlspecialchars($usuario->getRol()); ?></td>
+                        <td><input type="checkbox" class="select-user" data-id="<?php echo $usuario->getId(); ?>" /></td>
+                        <td class="nombre-col"><?php echo htmlspecialchars($usuario->getNombre()); ?></td>
+                        <td class="email-col"><?php echo htmlspecialchars($usuario->getEmail()); ?></td>
+                        <td class="rol-col"><?php echo htmlspecialchars($usuario->getRol()); ?></td>
                         <td>
-                            <button class="btn-action view"><i class="fas fa-eye"></i></button>
-                            <button class="btn-action edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn-action edit" onclick="mostrarPopupEditar('<?php echo $usuario->getId(); ?>', '<?php echo htmlspecialchars($usuario->getNombre()); ?>', '<?php echo htmlspecialchars($usuario->getEmail()); ?>', '<?php echo htmlspecialchars($usuario->getRol()); ?>')">
+                                <i class="fas fa-edit"></i>
+                            </button>
                             <button class="btn-action delete" onclick="eliminarUsuario(<?php echo $usuario->getId(); ?>)">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -172,7 +219,6 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
         </button>
     </section>
 
-    <!-- Paginación -->
     <div class="pagination">
         <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
             <a href="?pagina=<?php echo $i; ?>" class="page-btn <?php if ($i === $pagina_actual) echo 'active'; ?>">
@@ -181,28 +227,45 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
         <?php endfor; ?>
     </div>
 
-    <!-- Popup de Agregar Usuario -->
     <div id="popup">
         <div class="popup-content">
             <span class="close-btn" onclick="cerrarPopup()">&times;</span>
             <h2>Agregar Usuario</h2>
-            <form id="form-crear-usuario" method="POST" action="crear_usuario.php">
+            <form id="form-crear-usuario">
                 <label for="nombre">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" placeholder="Ingresa el nombre" required>
-
+                <input type="text" id="nombre" name="nombre" required>
                 <label for="email">Email:</label>
-                <input type="email" id="email" name="email" placeholder="Ingresa el email" required>
-
+                <input type="email" id="email" name="email" required>
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" placeholder="Ingresa el password" required>
-
+                <input type="password" id="password" name="password" required>
                 <label for="rol">Rol:</label>
                 <select id="rol" name="rol" required>
                     <option value="admin">Admin</option>
                     <option value="vendedor">Vendedor</option>
                 </select>
+                <button type="submit">Guardar</button>
+            </form>
+        </div>
+    </div>
 
-                <button type="submit" class="btn add-new">Guardar</button>
+    <div id="popup-editar">
+        <div class="popup-content">
+            <span class="close-btn" onclick="cerrarPopupEditar()">&times;</span>
+            <h2>Editar Usuario</h2>
+            <form id="form-editar-usuario">
+                <input type="hidden" id="editar-id" name="id">
+                <label for="editar-nombre">Nombre:</label>
+                <input type="text" id="editar-nombre" name="nombre" required>
+                <label for="editar-email">Email:</label>
+                <input type="email" id="editar-email" name="email" required>
+                <label for="editar-password">Nueva Contraseña (opcional):</label>
+                <input type="password" id="editar-password" name="password">
+                <label for="editar-rol">Rol:</label>
+                <select id="editar-rol" name="rol" required>
+                    <option value="admin">Admin</option>
+                    <option value="vendedor">Vendedor</option>
+                </select>
+                <button type="submit">Guardar Cambios</button>
             </form>
         </div>
     </div>
