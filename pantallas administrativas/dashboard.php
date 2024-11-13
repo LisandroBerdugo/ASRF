@@ -35,9 +35,9 @@ $pagina = isset($_GET['page']) ? $_GET['page'] : 'inicio';
             </div>
             <nav class="nav">
                 <ul>
-                    <li><a href="dashboard.php?page=inicio"><i class="fas fa-home"></i> Inicio</a></li>
-                    <li><a href="dashboard.php?page=usuarios"><i class="fas fa-users"></i> Configuración Usuarios</a></li>
-                    <li><a href="dashboard.php?page=productos"><i class="fas fa-box-open"></i> Productos</a></li>
+                    <li><a href="dashboard.php?page=inicio" class="<?php echo $pagina === 'inicio' ? 'active' : ''; ?>"><i class="fas fa-home"></i> Inicio</a></li>
+                    <li><a href="dashboard.php?page=usuarios" class="<?php echo $pagina === 'usuarios' ? 'active' : ''; ?>"><i class="fas fa-users"></i> Configuración Usuarios</a></li>
+                    <li><a href="dashboard.php?page=productos" class="<?php echo $pagina === 'productos' ? 'active' : ''; ?>"><i class="fas fa-box-open"></i> Productos</a></li>
                 </ul>
             </nav>
             <div class="footer">
@@ -66,12 +66,11 @@ $pagina = isset($_GET['page']) ? $_GET['page'] : 'inicio';
                 // Incluye la página seleccionada
                 switch ($pagina) {
                     case 'usuarios':
-                        include 'usuarios.php';
+                        include __DIR__ . '/usuarios.php';
                         break;
                     case 'productos':
-                        include 'productos.php';
+                        include __DIR__ . '/productos.php';
                         break;
-                    case 'inicio':
                     default:
                         echo "<h2>BIENVENIDOS AL CENTRO DE ADMINISTRACIÓN</h2>";
                         echo "<p>Usa el menú de la izquierda para gestionar el sistema.</p>";

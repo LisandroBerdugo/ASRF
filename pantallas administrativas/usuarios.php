@@ -219,13 +219,14 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
         </button>
     </section>
 
-    <div class="pagination">
-        <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-            <a href="?pagina=<?php echo $i; ?>" class="page-btn <?php if ($i === $pagina_actual) echo 'active'; ?>">
-                <?php echo $i; ?>
-            </a>
-        <?php endfor; ?>
-    </div>
+<div class="pagination">
+    <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
+        <a href="?pagina=<?php echo $i; ?>" class="page-btn <?php if ($i === $pagina_actual) echo 'active'; ?>">
+            <?php echo $i; ?>
+        </a>
+    <?php endfor; ?>
+</div>
+
 
     <div id="popup">
         <div class="popup-content">
