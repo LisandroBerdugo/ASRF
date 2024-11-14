@@ -46,8 +46,8 @@ $productos_pagina = array_slice($productos, $inicio, $productos_por_pagina);
         .then(producto => {
             document.getElementById('editar-id').value = producto.id;
             document.getElementById('editar-nombre').value = producto.nombre;
-            document.getElementById('editar-precio').value = producto.precio;
-            document.getElementById('editar-stock').value = producto.stock;
+            document.getElementById('editar-precio').value = parseFloat(producto.precio).toFixed(2); // Formato de 2 decimales
+            document.getElementById('editar-stock').value = parseInt(producto.stock, 10); // Entero para el stock
             document.getElementById('editar-id_marca').value = producto.id_marca;
             document.getElementById('editar-id_color').value = producto.id_color;
             document.getElementById('editar-id_microprocesador').value = producto.id_microprocesador;
@@ -56,8 +56,7 @@ $productos_pagina = array_slice($productos, $inicio, $productos_por_pagina);
             document.getElementById('editar-id_idioma_teclado').value = producto.id_idioma_teclado;
 
             document.getElementById('editar-popup').style.display = 'flex';
-            document.getElementById('overlay').style.display = 'block'; // Mostrar el overlay
-        
+            document.getElementById('overlay').style.display = 'block';
         })
         .catch(error => {
             console.error("Error al obtener los datos del producto:", error);
@@ -134,11 +133,11 @@ function cerrarEditarPopup() {
         }
 
        
-        document.addEventListener('DOMContentLoaded', function () {
+       document.addEventListener('DOMContentLoaded', function () {
     const formEditar = document.querySelector('#form-editar-producto');
 
     formEditar.addEventListener('submit', function (event) {
-        event.preventDefault(); // Evita el envío del formulario tradicional
+        event.preventDefault(); // Evita el envío tradicional del formulario
 
         const formData = new FormData(this);
 
@@ -146,21 +145,29 @@ function cerrarEditarPopup() {
             method: 'POST',
             body: formData
         })
-        .then(response => response.text())
+        .then(response => response.json()) // Procesar como JSON
         .then(data => {
-            if (data === 'success') {
-                alert("Producto actualizado correctamente.");
-                location.reload(); // Recargar la página para reflejar los cambios
+            if (data.status === 'success') {
+                alert(data.message); // Mostrar mensaje de éxito
+                cerrarEditarPopup(); // Cerrar el popup de edición
+                location.reload(); // Recargar la tabla para reflejar los cambios
             } else {
-                alert("Error al actualizar el producto.");
+                alert("Error: " + data.message); // Mostrar mensaje de error
             }
         })
         .catch(error => {
             console.error("Error al procesar la solicitud:", error);
-            alert("Ocurrió un error al actualizar el producto.");
+            alert("Ocurrió un error al intentar actualizar el producto.");
         });
     });
 });
+
+
+function cerrarEditarPopup() {
+    document.getElementById('editar-popup').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none'; // Oculta el overlay
+}
+
 
         document.addEventListener('DOMContentLoaded', function () {
             const formCrear = document.querySelector('#form-crear-producto');
@@ -199,43 +206,39 @@ function cerrarEditarPopup() {
     </div>
 
     <section class="table-section">
-        <table class="user-table">
-            <thead>
-                <tr>
-                    <th>Modelo</th>
-                    <th>Precio</th>
-                    <th>Stock</th>
-                    <th>Imagen</th>
-                    <th>Acciones</th>
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>Modelo</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Código</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($productos_pagina as $producto): ?>
+                <tr data-id="<?php echo $producto->getId(); ?>">
+    <td><?php echo htmlspecialchars($producto->getNombre()); ?></td>
+    <td><?php echo number_format($producto->getPrecio(), 2); ?></td>
+    <td><?php echo intval($producto->getStock()); ?></td>
+    <td><?php echo htmlspecialchars($producto->getCodigoUnico()); ?></td>
+    <td>
+        <button class="btn-action edit" onclick="mostrarEditarPopup(<?php echo $producto->getId(); ?>)">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button class="btn-action delete" onclick="eliminarProducto(<?php echo $producto->getId(); ?>)">
+            <i class="fas fa-trash"></i>
+        </button>
+    </td>
+</tr>
+
                 </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($productos_pagina as $producto): ?>
-                    <tr data-id="<?php echo $producto->getId(); ?>">
-                        <td><?php echo htmlspecialchars($producto->getNombre()); ?></td>
-                        <td><?php echo htmlspecialchars($producto->getPrecio()); ?></td>
-                        <td><?php echo htmlspecialchars($producto->getStock()); ?></td>
-                        <td>
-                            <?php if ($producto->getImagen()): ?>
-                                <img src="<?php echo htmlspecialchars($producto->getImagen()); ?>" alt="Imagen del producto" style="width: 100px; height: auto;">
-                            <?php else: ?>
-                                <span>No hay imagen</span>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-    <button class="btn-action edit" onclick="mostrarEditarPopup(<?php echo $producto->getId(); ?>)">
-        <i class="fas fa-edit"></i>
-    </button>
-                        
-                            <button class="btn-action delete" onclick="eliminarProducto(<?php echo $producto->getId(); ?>)">
-                            <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </section>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</section>
+
 
     <div class="pagination">
         <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
@@ -249,7 +252,7 @@ function cerrarEditarPopup() {
         <div class="popup-content">
             <span class="close-btn" onclick="cerrarPopup()">&times;</span>
             <h2>Agregar Producto</h2>
-            <form id="form-crear-producto" enctype="multipart/form-data">
+            <form id="form-crear-producto" action="crear_producto.php" method="POST" enctype="multipart/form-data">
                 <label for="nombre">Modelo:</label>
                 <input type="text" id="nombre" name="nombre" required>
 
@@ -319,7 +322,7 @@ function cerrarEditarPopup() {
     <div class="popup-content">
         <span class="close-btn" onclick="cerrarEditarPopup()">&times;</span>
         <h2>Editar Producto</h2>
-        <form id="form-editar-producto" enctype="multipart/form-data">
+        <form id="form-editar-producto" action="editar_producto.php" method="POST" enctype="multipart/form-data">
             <input type="hidden" id="editar-id" name="id">
             
             <label for="editar-nombre">Modelo:</label>

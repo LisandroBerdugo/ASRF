@@ -49,7 +49,7 @@ class ProductoDAL {
         }
     }
 
-    // Obtener modelos filtrados por marca
+  /*  // Obtener modelos filtrados por marca
     public function obtenerModelosPorMarca($id_marca) {
         try {
             $query = "SELECT id, modelo FROM modelo WHERE id_marca = :id_marca";
@@ -62,6 +62,7 @@ class ProductoDAL {
             return [];
         }
     }
+    */
 
     // Obtener colores
     public function obtenerColores() {
@@ -182,7 +183,41 @@ public function crearProducto($producto) {
     }
 }
     
-    public function editarProducto($producto) {
+    public function actualizarProducto($producto) {
+    try {
+        $query = "UPDATE productos SET 
+                  nombre = :nombre, 
+                  precio = :precio, 
+                  stock = :stock, 
+                  id_marca = :id_marca, 
+                  id_color = :id_color, 
+                  id_microprocesador = :id_microprocesador, 
+                  id_ram = :id_ram, 
+                  id_tamano_pantalla = :id_tamano_pantalla, 
+                  id_idioma_teclado = :id_idioma_teclado
+                  WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindValue(':id', $producto->getId(), PDO::PARAM_INT);
+        $stmt->bindValue(':nombre', $producto->getNombre());
+        $stmt->bindValue(':precio', $producto->getPrecio());
+        $stmt->bindValue(':stock', $producto->getStock());
+        $stmt->bindValue(':id_marca', $producto->getIdMarca());
+        $stmt->bindValue(':id_color', $producto->getIdColor());
+        $stmt->bindValue(':id_microprocesador', $producto->getIdMicroprocesador());
+        $stmt->bindValue(':id_ram', $producto->getIdRam());
+        $stmt->bindValue(':id_tamano_pantalla', $producto->getIdTamanoPantalla());
+        $stmt->bindValue(':id_idioma_teclado', $producto->getIdIdiomaTeclado());
+
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        echo "Error al actualizar el producto: " . $e->getMessage();
+        return false;
+    }
+}
+
+public function editarProducto($producto) {
     try {
         $query = "UPDATE productos SET 
                   nombre = :nombre, 
@@ -207,12 +242,14 @@ public function crearProducto($producto) {
         $stmt->bindValue(':id_ram', $producto->getIdRam());
         $stmt->bindValue(':id_tamano_pantalla', $producto->getIdTamanoPantalla());
         $stmt->bindValue(':id_idioma_teclado', $producto->getIdIdiomaTeclado());
+
         return $stmt->execute();
     } catch (PDOException $e) {
-        echo "Error al editar producto: " . $e->getMessage();
+        echo "Error al actualizar el producto: " . $e->getMessage();
         return false;
     }
 }
 
-
+    
+    
 }

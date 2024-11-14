@@ -59,9 +59,10 @@ public function eliminarProducto($id) {
         return $this->productoDAL->actualizarProducto($producto);
     }
     
-    public function obtenerModelosPorMarca($id_marca) {
-    return $this->productoDAL->obtenerModelosPorMarca($id_marca);
+    public function editarProductoCompleto($producto) {
+    return $this->productoDAL->editarProducto($producto);
 }
+
 
 }
 ?>
