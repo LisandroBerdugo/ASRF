@@ -14,7 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id_ram = $_POST['id_ram'] ?? null;
     $id_tamano_pantalla = $_POST['id_tamano_pantalla'] ?? null;
     $id_idioma_teclado = $_POST['id_idioma_teclado'] ?? null;
-
+    $rutaImagen = null;
+    
     if (
         !$id || !$nombre || $precio === null || $stock === null ||
         !$id_marca || !$id_color || !$id_microprocesador ||
@@ -24,13 +25,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    // Procesar la imagen
+        if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+            $nombreArchivo = uniqid() . "_" . basename($_FILES['imagen']['name']);
+            $rutaDestino = __DIR__ . '/../uploads/' . $nombreArchivo;
+
+            if (move_uploaded_file($_FILES['imagen']['tmp_name'], $rutaDestino)) {
+                $rutaImagen = 'uploads/' . $nombreArchivo; // Ruta relativa
+            } else {
+                die("Error: No se pudo mover la imagen al directorio de uploads.");
+            }
+        } 
     $productoBLL = new ProductoBLL();
 
     $producto = new Producto(
         $id,
         null, // Código único no se actualiza
         $nombre,
-        null, // Imagen no se actualiza aquí
+        $rutaImagen,
         $id_marca,
         $id_color,
         $id_microprocesador,

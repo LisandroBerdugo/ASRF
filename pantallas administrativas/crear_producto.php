@@ -42,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nombre,
             $rutaImagen,
             $id_marca,
-            null, // Modelo se deja como NULL
             $id_color,
             $id_microprocesador,
             $id_ram,

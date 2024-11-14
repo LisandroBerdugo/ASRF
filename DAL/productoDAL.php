@@ -130,7 +130,6 @@ class ProductoDAL {
                     $row['nombre'],
                     $row['imagen_url'],
                     $row['id_marca'],
-                    null, // Modelo no necesario
                     $row['id_color'],
                     $row['id_microprocesador'],
                     $row['id_ram'],
@@ -186,7 +185,8 @@ public function crearProducto($producto) {
     public function actualizarProducto($producto) {
     try {
         $query = "UPDATE productos SET 
-                  nombre = :nombre, 
+                  nombre = :nombre,
+                  ".($producto->getImagen()!=null?"imagen_url=:imagen_url,":"")."
                   precio = :precio, 
                   stock = :stock, 
                   id_marca = :id_marca, 
@@ -201,6 +201,7 @@ public function crearProducto($producto) {
 
         $stmt->bindValue(':id', $producto->getId(), PDO::PARAM_INT);
         $stmt->bindValue(':nombre', $producto->getNombre());
+        $stmt->bindValue(':imagen_url', $producto->getImagen());
         $stmt->bindValue(':precio', $producto->getPrecio());
         $stmt->bindValue(':stock', $producto->getStock());
         $stmt->bindValue(':id_marca', $producto->getIdMarca());
@@ -220,7 +221,8 @@ public function crearProducto($producto) {
 public function editarProducto($producto) {
     try {
         $query = "UPDATE productos SET 
-                  nombre = :nombre, 
+                  nombre = :nombre,
+                  ".($producto->getImagen()!=null?"imagen_url=:imagen_url,":"")."
                   precio = :precio, 
                   stock = :stock, 
                   id_marca = :id_marca, 
@@ -234,6 +236,7 @@ public function editarProducto($producto) {
         $stmt = $this->conn->prepare($query);
         $stmt->bindValue(':id', $producto->getId(), PDO::PARAM_INT);
         $stmt->bindValue(':nombre', $producto->getNombre());
+        $stmt->bindValue(':imagen_url', $producto->getImagen());
         $stmt->bindValue(':precio', $producto->getPrecio());
         $stmt->bindValue(':stock', $producto->getStock());
         $stmt->bindValue(':id_marca', $producto->getIdMarca());

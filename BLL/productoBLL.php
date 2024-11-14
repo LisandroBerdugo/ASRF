@@ -10,7 +10,7 @@ class ProductoBLL {
     }
 
 public function crearProducto($codigo_unico, $nombre, $imagen_url, $id_marca, $id_color, $id_microprocesador, $id_ram, $id_tamano_pantalla, $id_idioma_teclado, $precio, $stock) {
-    $producto = new Producto(null, $codigo_unico, $nombre, $imagen_url, $id_marca, null, $id_color, $id_microprocesador, $id_ram, $id_tamano_pantalla, $id_idioma_teclado, $precio, $stock);
+    $producto = new Producto(null, $codigo_unico, $nombre, $imagen_url, $id_marca, $id_color, $id_microprocesador, $id_ram, $id_tamano_pantalla, $id_idioma_teclado, $precio, $stock);
     return $this->productoDAL->crearProducto($producto);
 }
 
