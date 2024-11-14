@@ -6,23 +6,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = $_POST['nombre'] ?? null;
     $precio = $_POST['precio'] ?? null;
     $stock = $_POST['stock'] ?? null;
+    $id_marca = $_POST['id_marca'] ?? null;
+    $id_color = $_POST['id_color'] ?? null;
+    $id_microprocesador = $_POST['id_microprocesador'] ?? null;
+    $id_ram = $_POST['id_ram'] ?? null;
+    $id_tamano_pantalla = $_POST['id_tamano_pantalla'] ?? null;
+    $id_idioma_teclado = $_POST['id_idioma_teclado'] ?? null;
 
-    $imagen_url = null;
-    if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
-        $nombreArchivo = uniqid() . '_' . $_FILES['imagen']['name'];
-        $rutaDestino = __DIR__ . '/../uploads/' . $nombreArchivo;
-        if (move_uploaded_file($_FILES['imagen']['tmp_name'], $rutaDestino)) {
-            $imagen_url = 'uploads/' . $nombreArchivo;
-        }
-    }
-
-    if (!$id || !$nombre || !$precio || !$stock || !is_numeric($id)) {
+    if (!$id || !$nombre || !$precio || !$stock || !$id_marca || !$id_color || !$id_microprocesador || !$id_ram || !$id_tamano_pantalla || !$id_idioma_teclado) {
         echo "error";
         exit();
     }
 
     $productoBLL = new ProductoBLL();
-    $resultado = $productoBLL->editarProducto($id, $nombre, $precio, $stock, $imagen_url);
+    $resultado = $productoBLL->editarProducto($id, $nombre, $precio, $stock);
 
     echo $resultado ? "success" : "error";
     exit();

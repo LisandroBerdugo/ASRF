@@ -39,6 +39,90 @@ $productos_pagina = array_slice($productos, $inicio, $productos_por_pagina);
     <link rel="stylesheet" href="productos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script>
+        
+        function mostrarEditarPopup(id) {
+    fetch(`obtener_producto.php?id=${id}`)
+        .then(response => response.json())
+        .then(producto => {
+            document.getElementById('editar-id').value = producto.id;
+            document.getElementById('editar-nombre').value = producto.nombre;
+            document.getElementById('editar-precio').value = producto.precio;
+            document.getElementById('editar-stock').value = producto.stock;
+            document.getElementById('editar-id_marca').value = producto.id_marca;
+            document.getElementById('editar-id_color').value = producto.id_color;
+            document.getElementById('editar-id_microprocesador').value = producto.id_microprocesador;
+            document.getElementById('editar-id_ram').value = producto.id_ram;
+            document.getElementById('editar-id_tamano_pantalla').value = producto.id_tamano_pantalla;
+            document.getElementById('editar-id_idioma_teclado').value = producto.id_idioma_teclado;
+
+            document.getElementById('editar-popup').style.display = 'flex';
+            document.getElementById('overlay').style.display = 'block'; // Mostrar el overlay
+        
+        })
+        .catch(error => {
+            console.error("Error al obtener los datos del producto:", error);
+            alert("No se pudieron cargar los datos del producto.");
+        });
+}
+
+function cerrarEditarPopup() {
+    document.getElementById('editar-popup').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none'; // Ocultar el overlay
+}
+
+        // Manejador del formulario de edición
+    document.getElementById('form-editar-producto').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('editar_producto.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data === 'success') {
+                alert("Producto actualizado correctamente.");
+                location.reload();
+            } else {
+                alert("Error al actualizar el producto.");
+            }
+        })
+        .catch(error => {
+            console.error("Error al procesar la solicitud:", error);
+            alert("Ocurrió un error al actualizar el producto.");
+        });
+    });
+        
+        
+        function eliminarProducto(id) {
+    if (!confirm("¿Estás seguro de que deseas eliminar este producto?")) {
+        return;
+    }
+
+    fetch('eliminar_producto.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `id=${id}`
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data === 'success') {
+            alert("Producto eliminado correctamente.");
+            location.reload(); // Recarga la página para actualizar la lista
+        } else {
+            alert("Error al eliminar el producto.");
+        }
+    })
+    .catch(error => {
+        console.error("Error al procesar la solicitud:", error);
+        alert("Ocurrió un error al intentar eliminar el producto.");
+    });
+}       
+        
         function mostrarPopup() {
             document.getElementById('popup').style.display = 'flex';
             document.getElementById('overlay').style.display = 'block';
@@ -48,6 +132,35 @@ $productos_pagina = array_slice($productos, $inicio, $productos_por_pagina);
             document.getElementById('popup').style.display = 'none';
             document.getElementById('overlay').style.display = 'none';
         }
+
+       
+        document.addEventListener('DOMContentLoaded', function () {
+    const formEditar = document.querySelector('#form-editar-producto');
+
+    formEditar.addEventListener('submit', function (event) {
+        event.preventDefault(); // Evita el envío del formulario tradicional
+
+        const formData = new FormData(this);
+
+        fetch('editar_producto.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data === 'success') {
+                alert("Producto actualizado correctamente.");
+                location.reload(); // Recargar la página para reflejar los cambios
+            } else {
+                alert("Error al actualizar el producto.");
+            }
+        })
+        .catch(error => {
+            console.error("Error al procesar la solicitud:", error);
+            alert("Ocurrió un error al actualizar el producto.");
+        });
+    });
+});
 
         document.addEventListener('DOMContentLoaded', function () {
             const formCrear = document.querySelector('#form-crear-producto');
@@ -110,7 +223,13 @@ $productos_pagina = array_slice($productos, $inicio, $productos_por_pagina);
                             <?php endif; ?>
                         </td>
                         <td>
-                            <button class="btn-action delete" onclick="eliminarProducto(<?php echo $producto->getId(); ?>)"><i class="fas fa-trash"></i></button>
+    <button class="btn-action edit" onclick="mostrarEditarPopup(<?php echo $producto->getId(); ?>)">
+        <i class="fas fa-edit"></i>
+    </button>
+                        
+                            <button class="btn-action delete" onclick="eliminarProducto(<?php echo $producto->getId(); ?>)">
+                            <i class="fas fa-trash"></i>
+                            </button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -124,6 +243,8 @@ $productos_pagina = array_slice($productos, $inicio, $productos_por_pagina);
         <?php endfor; ?>
     </div>
 
+    
+    
     <div id="popup">
         <div class="popup-content">
             <span class="close-btn" onclick="cerrarPopup()">&times;</span>
@@ -193,5 +314,81 @@ $productos_pagina = array_slice($productos, $inicio, $productos_por_pagina);
             </form>
         </div>
     </div>
+
+<div id="editar-popup">
+    <div class="popup-content">
+        <span class="close-btn" onclick="cerrarEditarPopup()">&times;</span>
+        <h2>Editar Producto</h2>
+        <form id="form-editar-producto" enctype="multipart/form-data">
+            <input type="hidden" id="editar-id" name="id">
+            
+            <label for="editar-nombre">Modelo:</label>
+            <input type="text" id="editar-nombre" name="nombre" required>
+
+            <label for="editar-precio">Precio:</label>
+            <input type="number" id="editar-precio" name="precio" step="0.01" required>
+
+            <label for="editar-stock">Stock:</label>
+            <input type="number" id="editar-stock" name="stock" required>
+
+            <label for="editar-id_marca">Marca:</label>
+            <select id="editar-id_marca" name="id_marca" required>
+                <option value="">Seleccione una marca</option>
+                <?php foreach ($marcas as $marca): ?>
+                    <option value="<?php echo $marca['id']; ?>"><?php echo htmlspecialchars($marca['marca']); ?></option>
+                <?php endforeach; ?>
+            </select>
+
+            <label for="editar-id_color">Color:</label>
+            <select id="editar-id_color" name="id_color" required>
+                <option value="">Seleccione un color</option>
+                <?php foreach ($colores as $color): ?>
+                    <option value="<?php echo $color['id']; ?>"><?php echo htmlspecialchars($color['color']); ?></option>
+                <?php endforeach; ?>
+            </select>
+
+            <label for="editar-id_microprocesador">Microprocesador:</label>
+            <select id="editar-id_microprocesador" name="id_microprocesador" required>
+                <option value="">Seleccione un microprocesador</option>
+                <?php foreach ($microprocesadores as $microprocesador): ?>
+                    <option value="<?php echo $microprocesador['id']; ?>"><?php echo htmlspecialchars($microprocesador['microprocesador']); ?></option>
+                <?php endforeach; ?>
+            </select>
+
+            <label for="editar-id_ram">RAM:</label>
+            <select id="editar-id_ram" name="id_ram" required>
+                <option value="">Seleccione RAM</option>
+                <?php foreach ($rams as $ram): ?>
+                    <option value="<?php echo $ram['id']; ?>"><?php echo htmlspecialchars($ram['ram']); ?> GB</option>
+                <?php endforeach; ?>
+            </select>
+
+            <label for="editar-id_tamano_pantalla">Tamaño de Pantalla:</label>
+            <select id="editar-id_tamano_pantalla" name="id_tamano_pantalla" required>
+                <option value="">Seleccione Tamaño</option>
+                <?php foreach ($tamanos_pantalla as $tamano): ?>
+                    <option value="<?php echo $tamano['id']; ?>"><?php echo htmlspecialchars($tamano['tamano']); ?> pulgadas</option>
+                <?php endforeach; ?>
+            </select>
+
+            <label for="editar-id_idioma_teclado">Idioma del Teclado:</label>
+            <select id="editar-id_idioma_teclado" name="id_idioma_teclado" required>
+                <option value="">Seleccione un idioma</option>
+                <?php foreach ($idiomas_teclado as $idioma): ?>
+                    <option value="<?php echo $idioma['id']; ?>"><?php echo htmlspecialchars($idioma['idioma']); ?></option>
+                <?php endforeach; ?>
+            </select>
+
+            <!-- Campo para subir nueva imagen -->
+            <label for="editar-imagen">Nueva Imagen:</label>
+            <input type="file" id="editar-imagen" name="imagen" accept="image/*">
+
+            <button type="submit">Guardar Cambios</button>
+        </form>
+    </div>
+</div>
+
+
+
 </body>
 </html>
