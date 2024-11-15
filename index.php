@@ -34,12 +34,12 @@ ob_end_flush();
 <body>
     <div class="container">
         <div class="left-section">
-            <h1>BLUEBACK</h1>
+            <h1>GRUPO GRIFFIN</h1>
             <p>Bienvenido a la plataforma de administración.</p>
         </div>
         <div class="right-section">
-            <h2>Welcome</h2>
-            <p>Login in your account to continue</p>
+            <h2>Bienvenido</h2>
+            <p>Introduce tu correo y contraseña</p>
             <?php if (isset($error)) { echo "<p style='color:red;'>$error</p>"; } ?>
             <form action="index.php" method="POST">
                 <input type="email" name="email" placeholder="Email" required>

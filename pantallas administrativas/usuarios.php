@@ -14,7 +14,7 @@ $usuarioBLL = new UsuarioBLL();
 $usuarios = $usuarioBLL->obtenerUsuarios();
 
 // Configuración de paginación
-$usuarios_por_pagina = 10;
+$usuarios_por_pagina = 15;
 $total_usuarios = count($usuarios);
 $total_paginas = ceil($total_usuarios / $usuarios_por_pagina);
 $pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
@@ -178,10 +178,6 @@ $usuarios_pagina = array_slice($usuarios, $inicio, $usuarios_por_pagina);
 
     <div class="toolbar">
         <button class="btn add-new" onclick="mostrarPopup()"><i class="fas fa-plus"></i> Agregar Nuevo</button>
-        <div class="search-bar">
-            <input type="text" placeholder="Buscar nombre..." />
-            <button><i class="fas fa-search"></i></button>
-        </div>
     </div>
 
     <section class="table-section">

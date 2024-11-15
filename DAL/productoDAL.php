@@ -184,9 +184,9 @@ public function crearProducto($producto) {
     
     public function actualizarProducto($producto) {
     try {
+        // Construcción dinámica de la consulta
         $query = "UPDATE productos SET 
                   nombre = :nombre,
-                  ".($producto->getImagen()!=null?"imagen_url=:imagen_url,":"")."
                   precio = :precio, 
                   stock = :stock, 
                   id_marca = :id_marca, 
@@ -194,14 +194,21 @@ public function crearProducto($producto) {
                   id_microprocesador = :id_microprocesador, 
                   id_ram = :id_ram, 
                   id_tamano_pantalla = :id_tamano_pantalla, 
-                  id_idioma_teclado = :id_idioma_teclado
-                  WHERE id = :id";
+                  id_idioma_teclado = :id_idioma_teclado";
+        
+        // Incluir imagen_url sólo si no es null
+        if ($producto->getImagen() !== null) {
+            $query .= ", imagen_url = :imagen_url";
+        }
 
+        $query .= " WHERE id = :id";
+
+        // Preparar la consulta
         $stmt = $this->conn->prepare($query);
 
+        // Bind de parámetros obligatorios
         $stmt->bindValue(':id', $producto->getId(), PDO::PARAM_INT);
         $stmt->bindValue(':nombre', $producto->getNombre());
-        $stmt->bindValue(':imagen_url', $producto->getImagen());
         $stmt->bindValue(':precio', $producto->getPrecio());
         $stmt->bindValue(':stock', $producto->getStock());
         $stmt->bindValue(':id_marca', $producto->getIdMarca());
@@ -211,18 +218,25 @@ public function crearProducto($producto) {
         $stmt->bindValue(':id_tamano_pantalla', $producto->getIdTamanoPantalla());
         $stmt->bindValue(':id_idioma_teclado', $producto->getIdIdiomaTeclado());
 
+        // Bind de imagen_url sólo si no es null
+        if ($producto->getImagen() !== null) {
+            $stmt->bindValue(':imagen_url', $producto->getImagen());
+        }
+
+        // Ejecutar la consulta
         return $stmt->execute();
     } catch (PDOException $e) {
         echo "Error al actualizar el producto: " . $e->getMessage();
         return false;
     }
 }
+
 
 public function editarProducto($producto) {
     try {
+        // Construcción dinámica de la consulta
         $query = "UPDATE productos SET 
-                  nombre = :nombre,
-                  ".($producto->getImagen()!=null?"imagen_url=:imagen_url,":"")."
+                  nombre = :nombre, 
                   precio = :precio, 
                   stock = :stock, 
                   id_marca = :id_marca, 
@@ -230,13 +244,21 @@ public function editarProducto($producto) {
                   id_microprocesador = :id_microprocesador, 
                   id_ram = :id_ram, 
                   id_tamano_pantalla = :id_tamano_pantalla, 
-                  id_idioma_teclado = :id_idioma_teclado
-                  WHERE id = :id";
+                  id_idioma_teclado = :id_idioma_teclado";
+        
+        // Incluir imagen_url sólo si se proporciona
+        if ($producto->getImagen() !== null) {
+            $query .= ", imagen_url = :imagen_url";
+        }
 
+        $query .= " WHERE id = :id";
+
+        // Preparar la consulta
         $stmt = $this->conn->prepare($query);
+
+        // Bind de parámetros obligatorios
         $stmt->bindValue(':id', $producto->getId(), PDO::PARAM_INT);
         $stmt->bindValue(':nombre', $producto->getNombre());
-        $stmt->bindValue(':imagen_url', $producto->getImagen());
         $stmt->bindValue(':precio', $producto->getPrecio());
         $stmt->bindValue(':stock', $producto->getStock());
         $stmt->bindValue(':id_marca', $producto->getIdMarca());
@@ -246,6 +268,12 @@ public function editarProducto($producto) {
         $stmt->bindValue(':id_tamano_pantalla', $producto->getIdTamanoPantalla());
         $stmt->bindValue(':id_idioma_teclado', $producto->getIdIdiomaTeclado());
 
+        // Bind de imagen_url sólo si se incluye en la consulta
+        if ($producto->getImagen() !== null) {
+            $stmt->bindValue(':imagen_url', $producto->getImagen());
+        }
+
+        // Ejecutar la consulta
         return $stmt->execute();
     } catch (PDOException $e) {
         echo "Error al actualizar el producto: " . $e->getMessage();
@@ -253,6 +281,5 @@ public function editarProducto($producto) {
     }
 }
 
-    
     
 }

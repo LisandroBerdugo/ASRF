@@ -33,13 +33,34 @@ $pagina = isset($_GET['page']) ? $_GET['page'] : 'inicio';
             <div class="logo">
                 <h2>Admin Panel</h2>
             </div>
-            <nav class="nav">
-                <ul>
-                    <li><a href="dashboard.php?page=inicio" class="<?php echo $pagina === 'inicio' ? 'active' : ''; ?>"><i class="fas fa-home"></i> Inicio</a></li>
-                    <li><a href="dashboard.php?page=usuarios" class="<?php echo $pagina === 'usuarios' ? 'active' : ''; ?>"><i class="fas fa-users"></i> Configuración Usuarios</a></li>
-                    <li><a href="dashboard.php?page=productos" class="<?php echo $pagina === 'productos' ? 'active' : ''; ?>"><i class="fas fa-box-open"></i> Productos</a></li>
-                </ul>
-            </nav>
+<nav class="nav">
+    <ul>
+        <li>
+            <a href="dashboard.php?page=inicio" class="<?php echo $pagina === 'inicio' ? 'active' : ''; ?>">
+                <i class="fas fa-home"></i> Inicio
+            </a>
+        </li>
+        <li>
+            <!-- Solo mostrar el enlace de Configuración Usuarios si el rol no es vendedor -->
+            <?php if ($_SESSION['rol'] !== 'vendedor'): ?>
+                <a href="dashboard.php?page=usuarios" class="<?php echo $pagina === 'usuarios' ? 'active' : ''; ?>">
+                    <i class="fas fa-users"></i> Configuración Usuarios
+                </a>
+            <?php else: ?>
+                <!-- Mostrar el enlace deshabilitado para vendedores con un evento onclick para la alerta -->
+                <a href="#" class="disabled" onclick="mostrarAlerta();">
+                    <i class="fas fa-users"></i> Configuración Usuarios
+                </a>
+            <?php endif; ?>
+        </li>
+        <li>
+            <a href="dashboard.php?page=productos" class="<?php echo $pagina === 'productos' ? 'active' : ''; ?>">
+                <i class="fas fa-box-open"></i> Productos
+            </a>
+        </li>
+    </ul>
+</nav>
+
             <div class="footer">
                 <p>Admin Dashboard</p>
             </div>
@@ -80,5 +101,11 @@ $pagina = isset($_GET['page']) ? $_GET['page'] : 'inicio';
             </section>
         </main>
     </div>
+    <script>
+    function mostrarAlerta() {
+        alert("El botón 'Configuración Usuarios' está deshabilitado para usuarios con el rol de 'vendedor'.");
+    }
+</script>
+
 </body>
 </html>
