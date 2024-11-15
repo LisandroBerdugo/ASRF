@@ -22,7 +22,7 @@ $tamanos_pantalla = $productoBLL->obtenerTamanosPantalla();
 $idiomas_teclado = $productoBLL->obtenerIdiomasTeclado();
 
 // Configuración de paginación
-$productos_por_pagina = 10;
+$productos_por_pagina = 20;
 $total_productos = count($productos);
 $total_paginas = ceil($total_productos / $productos_por_pagina);
 $pagina_actual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;

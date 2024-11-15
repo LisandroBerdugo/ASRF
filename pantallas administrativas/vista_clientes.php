@@ -26,7 +26,11 @@ $tamanos = $bll->obtenerTamanosPantalla(); // Método para obtener tamaños de p
     <link rel="stylesheet" href="vista_clientes.css">
 </head>
 <body>
-    <h1>Productos Disponibles</h1>
+    <!-- Banner Principal -->
+    <div class="banner">
+        <img src="../imagenes/banner.jpg" alt="Banner de Productos Disponibles">
+    </div>
+
     <div class="container">
         <form method="GET" action="vista_clientes.php" class="filters">
             <input type="text" name="buscar" placeholder="Buscar por modelo o código" value="<?php echo htmlspecialchars($filtros['buscar']); ?>">

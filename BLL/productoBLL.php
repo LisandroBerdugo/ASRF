@@ -47,9 +47,9 @@ public function crearProducto($codigo_unico, $nombre, $imagen_url, $id_marca, $i
         return $this->productoDAL->obtenerIdiomasTeclado();
     }
 
-public function eliminarProducto($id) {
-    return $this->productoDAL->eliminarProducto($id);
-}
+    public function eliminarProducto($id) {
+        return $this->productoDAL->eliminarProducto($id);
+    }
 
 
     public function editarProducto($id, $nombre, $precio, $stock) {

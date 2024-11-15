@@ -7,6 +7,19 @@ body {
     color: #333;
 }
 
+/* Banner Principal */
+.banner {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.banner img {
+    width: 100%; /* Ajusta el ancho del banner al tamaño de la pantalla */
+    max-height: 300px; /* Altura máxima para evitar que ocupe demasiado espacio */
+    object-fit: cover; /* Asegura que la imagen mantenga sus proporciones y rellene el espacio */
+    border-bottom: 2px solid #007bff; /* Línea decorativa */
+}
+
 /* Título Principal */
 h1 {
     text-align: center;
